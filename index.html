@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pidgin-Swahili Language Explorer</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      /* ---------- Theme Variables ---------- */
+      :root{
+      --bg-1: #07020b;
+      --bg-2: #0f0520;
+      --card: rgba(255,255,255,0.04);
+      --glass: rgba(255,255,255,0.03);
+      --glass-border: rgba(255,255,255,0.06);
+      --accent: #7c3aed; /* purple */
+      --accent-2: #06b6d4; /* teal */
+      --accent-3: #ff6b81; /* pink */
+      --muted: rgba(255,255,255,0.65);
+      --text: #f8f7fb;
+      --shadow-sm: 0 6px 18px rgba(0,0,0,0.6);
+      --shadow-lg: 0 20px 40px rgba(0,0,0,0.7);
+      }
+
+      /* ---------- Page Background ---------- */
+      html,body{
+      height:100%;
+      margin:0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      background: radial-gradient(1200px 600px at 10% 10%, rgba(124,58,237,0.09), transparent 10%),
+            radial-gradient(1000px 500px at 90% 85%, rgba(6,182,212,0.06), transparent 12%),
+            linear-gradient(180deg,var(--bg-1),var(--bg-2) 55%);
+      color:var(--text);
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      }
+
+      /* ---------- App Container & Layout ---------- */
+      .app-container{
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:3.5rem 1.25rem;
+      }
+
+      /* center content max width */
+      #main-interface{
+      width:100%;
+      max-width:1100px;
+      }
+
+      /* ---------- Glassy Card ---------- */
+      .card{
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border: 1px solid var(--glass-border);
+      backdrop-filter: blur(6px) saturate(120%);
+      box-shadow: var(--shadow-lg);
+      border-radius:1rem;
+      transition: transform .18s ease, box-shadow .18s ease;
+      }
+      .card:hover{
+      transform: translateY(-6px) scale(1.002);
+      box-shadow: 0 26px 60px rgba(2,6,23,0.7);
+      }
+
+      /* ---------- Character Panels ---------- */
+      .char-img{
+      width:100%;
+      max-width:230px;
+      height:220px;
+      object-fit:cover;
+      border-radius:16px;
+      box-shadow: 0 12px 30px rgba(12,8,30,0.7), inset 0 -6px 22px rgba(0,0,0,0.45);
+      transition: transform .5s cubic-bezier(.2,.9,.2,1), box-shadow .25s ease;
+      border: 1px solid rgba(255,255,255,0.04);
+      }
+      .char-img:hover{ transform: translateY(-8px) scale(1.06) rotate(-1deg); }
+
+      .pidgin-text{ color:var(--accent-2); font-weight:800; letter-spacing:0.6px; text-shadow: 0 6px 18px rgba(4,16,20,0.6); }
+      .swahili-text{ color:var(--accent); font-weight:800; letter-spacing:0.6px; text-shadow: 0 6px 18px rgba(20,8,30,0.6); }
+
+      /* ---------- Categories Grid ---------- */
+      .category-btn{
+      display:block;
+      width:100%;
+      text-align:left;
+      padding:1rem;
+      border-radius:12px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border:1px solid rgba(255,255,255,0.04);
+      color:var(--text);
+      box-shadow: 0 8px 18px rgba(0,0,0,0.6);
+      transition: transform .16s ease, box-shadow .16s ease, background .16s ease;
+      font-weight:700;
+      }
+      .category-btn:hover{
+      transform: translateY(-6px);
+      background: linear-gradient(180deg, rgba(124,58,237,0.06), rgba(6,182,212,0.03));
+      box-shadow: 0 26px 60px rgba(7,5,25,0.65);
+      }
+      .category-btn span{ display:inline-block; margin-right:.6rem; filter:drop-shadow(0 6px 20px rgba(0,0,0,0.6)); }
+
+      /* ---------- Inputs & Buttons ---------- */
+      input[type="text"], textarea{
+      width:100%;
+      padding:0.9rem 1rem;
+      border-radius:12px;
+      border:1px solid rgba(255,255,255,0.06);
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      color:var(--text);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.6), inset 0 -6px 20px rgba(0,0,0,0.25);
+      transition: box-shadow .12s ease, transform .12s ease, border-color .12s ease;
+      font-size:1rem;
+      }
+      input[type="text"]:focus, textarea:focus{
+      outline:none;
+      border-color: rgba(124,58,237,0.75);
+      box-shadow: 0 14px 40px rgba(124,58,237,0.08);
+      transform: translateY(-2px);
+      }
+
+      button{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:.6rem;
+      border-radius:12px;
+      padding:.8rem 1.1rem;
+      font-weight:800;
+      letter-spacing:.4px;
+      border:none;
+      background: linear-gradient(90deg, var(--accent), var(--accent-2));
+      color:white;
+      box-shadow: 0 12px 30px rgba(11,6,36,0.7);
+      transition: transform .12s ease, box-shadow .12s ease, filter .12s ease;
+      cursor:pointer;
+      }
+      button:hover{ transform: translateY(-4px); filter:brightness(1.03); box-shadow: 0 24px 60px rgba(11,6,36,0.8); }
+      button:active{ transform: translateY(-1px) scale(.998); }
+
+      /* Special action styles */
+      #start-game-btn{
+      background: linear-gradient(90deg, #ff416c, #ff6b6b);
+      box-shadow: 0 18px 40px rgba(255,80,120,0.12);
+      }
+      #submit-guess-btn{ background: linear-gradient(90deg,#2563eb,#4f46e5); }
+
+      /* Hint button nicer */
+      #hint-btn{
+      background: linear-gradient(90deg, rgba(255,212,150,0.12), rgba(255,244,220,0.06));
+      color:var(--muted);
+      border:1px solid rgba(255,255,255,0.04);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.45);
+      font-weight:700;
+      }
+      #hint-btn[disabled], .opacity-50{ opacity:0.34; transform:none !important; cursor:not-allowed; }
+
+      /* ---------- Game / Feedback UI ---------- */
+      #game-content{ padding:1rem 0; }
+      #game-content h3{
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      padding:1rem 1.25rem;
+      border-radius:12px;
+      border:1px solid rgba(255,255,255,0.04);
+      box-shadow: inset 0 -8px 30px rgba(0,0,0,0.25);
+      display:inline-block;
+      }
+      #score-display{
+      display:inline-block;
+      padding:.3rem .6rem;
+      border-radius:999px;
+      background: linear-gradient(90deg, rgba(124,58,237,0.12), rgba(6,182,212,0.06));
+      color:var(--text);
+      font-weight:900;
+      }
+
+      #game-feedback{
+      min-height:42px;
+      transition: all .18s ease;
+      }
+      #game-feedback .success{
+      background: linear-gradient(90deg,#10b981,#34d399);
+      color:white;
+      padding:.5rem .9rem;
+      border-radius:999px;
+      display:inline-block;
+      font-weight:800;
+      box-shadow: 0 12px 30px rgba(16,185,129,0.12);
+      }
+      #game-feedback .failure{
+      background: linear-gradient(90deg,#ef4444,#f97316);
+      color:white;
+      padding:.5rem .9rem;
+      border-radius:999px;
+      display:inline-block;
+      font-weight:800;
+      box-shadow: 0 12px 30px rgba(244,63,94,0.12);
+      }
+
+      /* Hint display */
+      #hint-display{
+      padding:.75rem 1rem;
+      border-radius:12px;
+      border:1px dashed rgba(255,255,255,0.04);
+      background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.00));
+      color:var(--muted);
+      font-weight:700;
+      }
+
+      /* ---------- Item Cards inside Lessons ---------- */
+      .lesson-item{
+      background: linear-gradient(180deg, rgba(255,255,255,0.015), rgba(255,255,255,0.008));
+      border-radius:12px;
+      padding:1.1rem;
+      border:1px solid rgba(255,255,255,0.03);
+      transition: transform .12s ease, box-shadow .12s ease;
+      }
+      .lesson-item:hover{ transform: translateY(-6px); box-shadow: 0 26px 60px rgba(2,6,23,0.6); }
+
+      .lesson-item .pidgin-text{ font-weight:800; color:var(--accent-2); }
+      .lesson-item .swahili-text{ font-weight:800; color:var(--accent); }
+
+      /* ---------- Small Helpers & Animations ---------- */
+      .fade-in{ animation: fadeIn .45s ease both; }
+      @keyframes fadeIn{ from{ opacity:0; transform: translateY(-8px) } to{ opacity:1; transform:none } }
+
+      /* Tiny responsive tweaks */
+      @media (max-width: 768px){
+      .char-img{ max-width:180px; height:160px; }
+      .category-btn{ padding:.85rem; font-size:.95rem; }
+      .app-container{ padding:2rem 1rem; }
+      }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <div id="main-interface" class="w-full max-w-6xl flex flex-col md:flex-row gap-4">
+
+            <!-- Left Character: Nigerian Man -->
+            <div id="pidgin-char" class="w-full md:w-1/4 p-4 flex flex-col items-center">
+                <img id="pidgin-avatar"
+                     class="char-img mb-2"
+                     src="images/nigerian.png"
+                     alt="Cartoon Nigerian Man"
+                >
+                <p class="text-xl font-bold pidgin-text">PIDGIN</p>
+            </div>
+
+            <!-- Center Content: Lessons, Game, Home -->
+            <div id="content-area" class="w-full md:w-2/4 card p-6">
+                <!-- Content will be dynamically rendered here -->
+            </div>
+
+            <!-- Right Character: East African Man -->
+            <div id="swahili-char" class="w-full md:w-1/4 p-4 flex flex-col items-center">
+                <img id="swahili-avatar"
+                     class="char-img mb-2"
+                     src="images/eastafrican.png"
+                     alt="Cartoon East African Man"
+                >
+                <p class="text-xl font-bold swahili-text">SWAHILI</p>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // --- 1. Hardcoded Language Data ---
+        const PHRASES = [
+            {
+                category: "Greetings",
+                icon: "👋",
+                data: [
+                    { pidgin: "How far? / Wetin dey happen?", swahili: "Habari yako? / Mambo vipi?" },
+                    { pidgin: "I dey fine.", swahili: "Mzima. / Mzuri sana." },
+                    { pidgin: "Welcome", swahili: "Karibu" },
+                    { pidgin: "What is your name?", swahili: "Jina lako nani?" },
+                    { pidgin: "My name na...", swahili: "Jina langu ni..." },
+                    { pidgin: "Thank you.", swahili: "Asante." },
+                    { pidgin: "Good morning.", swahili: "Habari za asubuhi." },
+                    { pidgin: "Good night.", swahili: "Usiku mwema." },
+                    { pidgin: "See you later.", swahili: "Tutaonana baadaye." }
+                ]
+            },
+            {
+                category: "Counting Numbers",
+                icon: "#️⃣",
+                data: [
+                    { pidgin: "One", swahili: "Moja" },
+                    { pidgin: "Two", swahili: "Mbili" },
+                    { pidgin: "Three", swahili: "Tatu" },
+                    { pidgin: "Four", swahili: "Nne" },
+                    { pidgin: "Five", swahili: "Tano" },
+                    { pidgin: "Six", swahili: "Sita" },
+                    { pidgin: "Seven", swahili: "Saba" },
+                    { pidgin: "Eight", swahili: "Nane" },
+                    { pidgin: "Nine", swahili: "Tisa" },
+                    { pidgin: "Ten", swahili: "Kumi" },
+                    { pidgin: "One hundred", swahili: "Mia moja" }
+                ]
+            },
+            {
+                category: "Days of the Week",
+                icon: "📅",
+                data: [
+                    { pidgin: "Today", swahili: "Leo" },
+                    { pidgin: "Yesterday", swahili: "Jana" },
+                    { pidgin: "Tomorrow", swahili: "Kesho" },
+                    { pidgin: "Sunday", swahili: "Jumapili" },
+                    { pidgin: "Monday", swahili: "Jumatatu" },
+                    { pidgin: "Tuesday", swahili: "Jumanne" },
+                    { pidgin: "Wednesday", swahili: "Jumatano" },
+                    { pidgin: "Thursday", swahili: "Alhamisi" },
+                    { pidgin: "Friday", swahili: "Ijumaa" },
+                    { pidgin: "Saturday", swahili: "Jumamosi" }
+                ]
+            },
+            {
+                category: "Domestic Animals",
+                icon: "🏡",
+                data: [
+                    { pidgin: "Dog", swahili: "Mbwa" },
+                    { pidgin: "Cat", swahili: "Paka" },
+                    { pidgin: "Goat", swahili: "Mbuzi" },
+                    { pidgin: "Chicken", swahili: "Kuku" },
+                    { pidgin: "Cow", swahili: "Ng'ombe" },
+                    { pidgin: "Pig", swahili: "Nguruwe" },
+                    { pidgin: "Sheep", swahili: "Kondoo" }
+                ]
+            },
+            {
+                category: "Wild Animals",
+                icon: "🦁",
+                data: [
+                    { pidgin: "Lion", swahili: "Simba" },
+                    { pidgin: "Elephant", swahili: "Tembo" },
+                    { pidgin: "Snake", swahili: "Nyoka" },
+                    { pidgin: "Monkey", swahili: "Tumbili" },
+                    { pidgin: "Giraffe", swahili: "Twiga" },
+                    { pidgin: "Zebra", swahili: "Punda milia" }
+                ]
+            },
+            {
+                category: "Food Items",
+                icon: "🍽️",
+                data: [
+                    { pidgin: "Water", swahili: "Maji" },
+                    { pidgin: "Food", swahili: "Chakula" },
+                    { pidgin: "Rice", swahili: "Wali" },
+                    { pidgin: "Fish", swahili: "Samaki" },
+                    { pidgin: "Salt", swahili: "Chumvi" },
+                    { pidgin: "Bread", swahili: "Mkate" },
+                    { pidgin: "Milk", swahili: "Maziwa" },
+                    { pidgin: "Tea", swahili: "Chai" }
+                ]
+            },
+            {
+                category: "Fruits",
+                icon: "🍎",
+                data: [
+                    { pidgin: "Apple", swahili: "Tufaha" },
+                    { pidgin: "Banana", swahili: "Ndizi" },
+                    { pidgin: "Mango", swahili: "Embe" },
+                    { pidgin: "Orange", swahili: "Chungwa" }
+                ]
+            },
+            {
+                category: "Household Items",
+                icon: "🛋️",
+                data: [
+                    { pidgin: "House", swahili: "Nyumba" },
+                    { pidgin: "Chair", swahili: "Kiti" },
+                    { pidgin: "Table", swahili: "Meza" },
+                    { pidgin: "Door", swahili: "Mlango" },
+                    { pidgin: "Bed", swahili: "Kitanda" },
+                    { pidgin: "Light", swahili: "Umeme" },
+                    { pidgin: "Money", swahili: "Pesa" }
+                ]
+            }
+        ];
+
+        // --- 2. Application State Management ---
+        const app = {
+            view: 'HOME', // HOME, LESSON, GAME
+            currentCategory: null,
+            game: {
+                currentWord: null,
+                score: 0,
+                total: 0,
+                hintUsed: false // NEW: Track if hint has been used for the current word
+            }
+        };
+
+        const contentArea = document.getElementById('content-area');
+
+        // --- 3. View Renderers ---
+
+        function render() {
+            window.scrollTo(0, 0); // Scroll to top on view change
+            contentArea.innerHTML = '';
+            switch (app.view) {
+                case 'HOME':
+                    renderHome();
+                    break;
+                case 'LESSON':
+                    renderLesson(app.currentCategory);
+                    break;
+                case 'GAME':
+                    renderGame();
+                    break;
+            }
+        }
+
+        function renderHome() {
+            let html = `
+                <h2 class="text-3xl font-extrabold text-gray-800 mb-2 text-center">Pidgin 🌍 Swahili</h2>
+                <p class="text-gray-600 mb-6">Select a category below to start learning Swahili phrases and words!</p>
+                <div class="grid grid-cols-2 lg:grid-cols-3 gap-4">
+            `;
+
+            PHRASES.forEach(p => {
+                html += `
+                    <button data-category="${p.category}" class="category-btn p-4 bg-yellow-100 hover:bg-yellow-200 transition duration-150 rounded-xl shadow-md text-gray-800 font-semibold text-left">
+                        <span class="text-2xl">${p.icon}</span> ${p.category}
+                    </button>
+                `;
+            });
+
+            html += `
+                </div>
+
+                <div class="mt-8 pt-6 border-t border-gray-200">
+                    <h3 class="text-2xl font-bold text-gray-800 mb-4 text-center">Challenge Yourself!</h3>
+                    <button id="start-game-btn" class="w-full py-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl shadow-lg transition duration-150">
+                        Start Swahili Word Guessing Game
+                    </button>
+                </div>
+            `;
+            contentArea.innerHTML = html;
+
+            // Attach event listeners for category buttons
+            document.querySelectorAll('.category-btn').forEach(button => {
+                button.addEventListener('click', () => {
+                    app.currentCategory = button.getAttribute('data-category');
+                    app.view = 'LESSON';
+                    render();
+                });
+            });
+
+            // Attach event listener for game button
+            document.getElementById('start-game-btn').addEventListener('click', () => {
+                app.view = 'GAME';
+                app.game.score = 0;
+                app.game.total = 0;
+                // Game setup called within renderGame
+                render();
+            });
+        }
+
+        function renderLesson(categoryName) {
+            const categoryData = PHRASES.find(p => p.category === categoryName);
+            if (!categoryData) {
+                app.view = 'HOME';
+                return render();
+            }
+
+            let html = `
+                <button id="back-btn" class="mb-4 text-gray-500 hover:text-gray-700 transition duration-150 flex items-center">
+                    <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                    Back to Categories
+                </button>
+                <h2 class="text-3xl font-extrabold text-gray-800 mb-6">${categoryName}</h2>
+
+                <div class="space-y-6">
+            `;
+
+            categoryData.data.forEach(item => {
+                html += `
+                    <div class="p-4 rounded-xl border-2 border-dashed border-gray-300 shadow-sm transition duration-200 hover:shadow-lg">
+                        <div class="text-sm uppercase text-gray-500">Pidgin (Nigeria)</div>
+                        <p class="text-xl pidgin-text mb-2">${item.pidgin}</p>
+                        <hr class="border-gray-100 my-2">
+                        <div class="text-sm uppercase text-gray-500">Swahili (East Africa)</div>
+                        <p class="text-xl swahili-text">${item.swahili}</p>
+                    </div>
+                `;
+            });
+
+            html += `</div>`;
+            contentArea.innerHTML = html;
+
+            document.getElementById('back-btn').addEventListener('click', () => {
+                app.view = 'HOME';
+                render();
+            });
+        }
+
+        // --- 4. Game Logic ---
+
+        function getAllWords() {
+            return PHRASES.flatMap(category => category.data);
+        }
+
+        // Helper function to find the category object for a given word object
+        function findCategoryForWord(word) {
+            if (!word) return null;
+            // Find the category whose data array contains this specific word object
+            return PHRASES.find(category => 
+                category.data.some(item => item.swahili === word.swahili && item.pidgin === word.pidgin)
+            );
+        }
+
+        function setupNewGameWord() {
+            const allWords = getAllWords();
+            let newWord;
+
+            // Simple logic to prevent immediate repetition if possible
+            do {
+                const randomIndex = Math.floor(Math.random() * allWords.length);
+                newWord = allWords[randomIndex];
+            } while (allWords.length > 1 && newWord === app.game.currentWord);
+
+            app.game.currentWord = newWord;
+            app.game.hintUsed = false; // Reset hint state for the new word
+        }
+
+        function checkGuess() {
+            const inputElement = document.getElementById('guess-input');
+            const feedbackElement = document.getElementById('game-feedback');
+            const guess = inputElement.value.trim().toLowerCase();
+            // Handle multiple correct answers separated by /
+            const correctPidgin = app.game.currentWord.pidgin.toLowerCase().split('/').map(s => s.trim());
+            
+            app.game.total++;
+
+            if (correctPidgin.includes(guess)) {
+                app.game.score++;
+                feedbackElement.innerHTML = `<span class="text-white bg-green-500 px-3 py-1 rounded-full font-bold">Correct! Na so! 🎉</span>`;
+            } else {
+                feedbackElement.innerHTML = `<span class="text-white bg-red-500 px-3 py-1 rounded-full font-bold">E no correct. Try again. The answer was: "${app.game.currentWord.pidgin}"</span>`;
+            }
+
+            // Update score display
+            document.getElementById('score-display').textContent = `${app.game.score} / ${app.game.total}`;
+            
+            // Move to next word after a short delay
+            setTimeout(() => {
+                inputElement.value = '';
+                setupNewGameWord();
+                renderGameWord();
+            }, 2000);
+        }
+        
+        function showHint() {
+            if (app.game.hintUsed) return; // Prevent multiple hints
+
+            app.game.hintUsed = true;
+            const category = findCategoryForWord(app.game.currentWord);
+            
+            const hintDisplay = document.getElementById('hint-display');
+            const hintButton = document.getElementById('hint-btn');
+            
+            if (category) {
+                // Update display and button state
+                hintDisplay.innerHTML = `<span class="font-bold text-gray-800">Category Hint:</span> ${category.icon} ${category.category}`;
+                hintDisplay.classList.remove('hidden');
+                
+                hintButton.classList.add('opacity-50', 'cursor-not-allowed', 'bg-yellow-600', 'text-white');
+                hintButton.classList.remove('bg-yellow-400', 'hover:bg-yellow-500', 'text-gray-800');
+                hintButton.disabled = true;
+                hintButton.textContent = "Hint Used";
+            }
+        }
+
+        function renderGameWord() {
+            if (!app.game.currentWord) {
+                setupNewGameWord();
+            }
+            const gameContent = document.getElementById('game-content');
+            const category = findCategoryForWord(app.game.currentWord);
+            
+            let html = `
+                <div class="text-center mb-6">
+                    <div class="text-sm uppercase text-gray-500">Guess the Pidgin equivalent of this Swahili word:</div>
+                    <h3 class="text-5xl font-extrabold swahili-text p-4 bg-gray-50 rounded-lg shadow-inner mt-2 mb-4">${app.game.currentWord.swahili}</h3>
+                </div>
+                
+                <!-- Dynamic Hint Display -->
+                <div id="hint-display" class="mt-2 mb-4 p-3 bg-yellow-50 text-center rounded-xl border border-yellow-200 ${app.game.hintUsed ? '' : 'hidden'}">
+                    ${app.game.hintUsed ? `<span class="font-bold text-gray-800">Category Hint:</span> ${category.icon} ${category.category}` : ''}
+                </div>
+
+                <div class="mb-6">
+                    <input type="text" id="guess-input" placeholder="Type your Pidgin answer here (e.g., 'One')"
+                           class="w-full p-4 border-2 border-gray-300 focus:border-blue-500 focus:ring focus:ring-blue-200 rounded-xl transition duration-150 text-lg">
+                </div>
+                
+                <button id="submit-guess-btn" class="w-full py-4 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xl rounded-xl shadow-lg transition duration-150 mb-4">
+                    Check Answer
+                </button>
+                
+                <!-- Hint Button -->
+                <div class="flex justify-center">
+                    <button id="hint-btn" 
+                            class="flex items-center text-sm px-4 py-2 rounded-full font-semibold transition duration-150 ${app.game.hintUsed ? 'opacity-50 cursor-not-allowed bg-yellow-600 text-white' : 'bg-yellow-400 hover:bg-yellow-500 text-gray-800'}"
+                            ${app.game.hintUsed ? 'disabled' : ''}>
+                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        ${app.game.hintUsed ? 'Hint Used' : 'Need a Hint?'}
+                    </button>
+                </div>
+            `;
+            gameContent.innerHTML = html;
+
+            document.getElementById('submit-guess-btn').addEventListener('click', checkGuess);
+            document.getElementById('guess-input').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    checkGuess();
+                }
+            });
+            document.getElementById('hint-btn').addEventListener('click', showHint);
+            document.getElementById('guess-input').focus();
+        }
+
+        function renderGame() {
+            // Ensure first word is set up
+            if (!app.game.currentWord) {
+                setupNewGameWord();
+            }
+            
+            let html = `
+                <button id="back-to-home-btn" class="mb-4 text-gray-500 hover:text-gray-700 transition duration-150 flex items-center">
+                    <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                    Back to Main Menu
+                </button>
+
+                <h2 class="text-3xl font-extrabold text-red-600 mb-2">Word Guessing Challenge!</h2>
+                <div class="flex justify-between items-center text-xl font-semibold mb-6 p-3 bg-gray-100 rounded-xl shadow-inner">
+                    <span>Score: </span>
+                    <span id="score-display" class="pidgin-text">${app.game.score} / ${app.game.total}</span>
+                </div>
+
+                <div id="game-content">
+                    <!-- Dynamic word content goes here -->
+                </div>
+
+                <div id="game-feedback" class="mt-4 p-3 text-center">
+                    <!-- Feedback messages appear here -->
+                </div>
+            `;
+            contentArea.innerHTML = html;
+
+            // Render the first word of the game
+            renderGameWord();
+
+            document.getElementById('back-to-home-btn').addEventListener('click', () => {
+                app.view = 'HOME';
+                app.game.currentWord = null; // Reset game state
+                render();
+            });
+        }
+
+
+        // --- 5. Initialization ---
+        window.onload = function() {
+            render();
+        };
+
+    </script>
+    <footer class="mt-6 text-center text-sm text-gray-400">
+        &copy; <span id="year"></span> Stanley Bagambisa. All rights reserved.
+    </footer>
+    <script>
+        document.getElementById('year').textContent = new Date().getFullYear();
+    </script>
+</body>
+</html>
